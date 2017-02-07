@@ -36,7 +36,6 @@ class Handle(object):
 
     def POST(self):
         try:
-            print Token().get_access_token()
             webData = web.data()
             print "Handle Post webdata is ", webData  # 后台打日志
             recMsg = receive.parse_xml(webData)
@@ -44,9 +43,14 @@ class Handle(object):
                 toUser = recMsg.FromUserName
                 fromUser = recMsg.ToUserName
                 if recMsg.MsgType == 'text':
-                    content = "test"
-                    replyMsg = reply.TextMsg(toUser, fromUser, content)
-                    return replyMsg.send()
+                    if recMsg.Content == '1':
+                        content = Material().batch_get(Token().get_access_token(), "news", 0, 5).encode('utf-8')
+                        replyMsg = reply.TextMsg(recMsg.FromUserName, recMsg.ToUserName, content)
+                        return replyMsg.send()
+                    else:
+                        content = "hi," + recMsg.Content
+                        replyMsg = reply.TextMsg(toUser, fromUser, content)
+                        return replyMsg.send()
                 if recMsg.MsgType == 'image':
                     mediaId = recMsg.MediaId
                     replyMsg = reply.ImageMsg(toUser, fromUser, mediaId)
