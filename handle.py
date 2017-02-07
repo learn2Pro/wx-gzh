@@ -36,7 +36,7 @@ class Handle(object):
 
     def POST(self):
         try:
-            print Token.get_access_token()
+            print Token().get_access_token()
             webData = web.data()
             print "Handle Post webdata is ", webData  # 后台打日志
             recMsg = receive.parse_xml(webData)
@@ -56,7 +56,7 @@ class Handle(object):
             if isinstance(recMsg, receive.EventMsg):
                 if recMsg.Event == 'CLICK':
                     if recMsg.Eventkey == 'wxmenu_2_0':
-                        content = myMaterial.batch_get(Token.get_access_token(), "news", 0, 5).encode('utf-8')
+                        content = myMaterial.batch_get(Token().get_access_token(), "news", 0, 5).encode('utf-8')
                         replyMsg = reply.TextMsg(recMsg.FromUserName, recMsg.ToUserName, content)
                         return replyMsg.send()
             else:
