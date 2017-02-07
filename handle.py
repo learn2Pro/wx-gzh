@@ -6,7 +6,7 @@ import web
 import reply
 import receive
 from basic import Token
-from material import myMaterial
+from material import Material
 
 
 class Handle(object):
@@ -56,7 +56,7 @@ class Handle(object):
             if isinstance(recMsg, receive.EventMsg):
                 if recMsg.Event == 'CLICK':
                     if recMsg.Eventkey == 'wxmenu_2_0':
-                        content = myMaterial.batch_get(Token().get_access_token(), "news", 0, 5).encode('utf-8')
+                        content = Material().batch_get(Token().get_access_token(), "news", 0, 5).encode('utf-8')
                         replyMsg = reply.TextMsg(recMsg.FromUserName, recMsg.ToUserName, content)
                         return replyMsg.send()
             else:
