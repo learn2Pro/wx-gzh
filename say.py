@@ -11,7 +11,7 @@ class Poem(object):
         try:
             title = web.input()
             key = title.get("keyword");
-            sample.main(key)
+            sample.say(key)
             return "hello world!-get"
         except Exception, Argument:
             return Argument
