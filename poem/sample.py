@@ -12,14 +12,14 @@ from model import Model
 
 from six import text_type
 
-def main(keyword):
+def say(keyword):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save_dir', type=str, default='save',
-                       help='model directory to store checkpointed models')
-    parser.add_argument('--prime', type=str, default='',
-                       help=u'输入指定文字生成藏头诗')
-    parser.add_argument('--sample', type=int, default=1,
-                       help='0 to use max at each timestep, 1 to sample at each timestep')
+    # parser.add_argument('--save_dir', type=str, default='save',
+    #                    help='model directory to store checkpointed models')
+    # parser.add_argument('--prime', type=str, default='',
+    #                    help=u'输入指定文字生成藏头诗')
+    # parser.add_argument('--sample', type=int, default=1,
+    #                    help='0 to use max at each timestep, 1 to sample at each timestep')
 
     args = parser.parse_args()
     if keyword is not None:
@@ -42,4 +42,4 @@ def sample(args):
             # args.prime
 # decode('utf-8',errors='ignore')
 if __name__ == '__main__':
-    main("")
+    say("")
