@@ -32,15 +32,15 @@ def say(keyword):
 
 
 def sample(keyword):
-    with open(os.path.join(r'..\rnn\config.pkl'), 'rb') as f:
+    with open(os.path.join(r'../rnn/config.pkl'), 'rb') as f:
         saved_args = cPickle.load(f)
-    with open(os.path.join(r'..\rnn\chars_vocab.pkl'), 'rb') as f:
+    with open(os.path.join(r'../rnn/chars_vocab.pkl'), 'rb') as f:
         chars, vocab = cPickle.load(f)
     model = Model(saved_args, True)
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tf.all_variables())
-        ckpt = tf.train.get_checkpoint_state(r"..\rnn")
+        ckpt = tf.train.get_checkpoint_state(r"../rnn")
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
             print(model.sample(sess, chars, vocab, keyword, 1))
