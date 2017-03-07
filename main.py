@@ -2,9 +2,11 @@
 # filename: main.py
 import web
 from handle import Handle
+from say import Poem
 
 urls = (
     '/wx', 'Handle',
+    '/poem', 'Poem',
 )
 
 if __name__ == '__main__':
