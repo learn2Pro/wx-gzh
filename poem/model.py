@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-# filename: model.py
+# -*- coding:utf-8 -*-
 
 import tensorflow as tf
-from tensorflow.contrib.rnn import core_rnn_cell as rnn_cell
-import tensorflow.contrib.legacy_seq2seq as seq2seq
+from tensorflow.contrib import rnn
+from tensorflow.contrib import legacy_seq2seq
 import numpy as np
 
 
@@ -12,42 +11,48 @@ class Model():
         self.args = args
         if infer:
             args.batch_size = 1
+            args.seq_length = 1
 
         if args.model == 'rnn':
-            cell_fn = rnn_cell.BasicRNNCell
+            cell_fn = rnn.BasicRNNCell
         elif args.model == 'gru':
-            cell_fn = rnn_cell.GRUCell
+            cell_fn = rnn.GRUCell
         elif args.model == 'lstm':
-            cell_fn = rnn_cell.BasicLSTMCell
+            cell_fn = rnn.BasicLSTMCell
         else:
             raise Exception("model type not supported: {}".format(args.model))
 
-        cell = cell_fn(args.rnn_size, state_is_tuple=False)
+        cell = cell_fn(args.rnn_size, state_is_tuple=True)
 
-        self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers, state_is_tuple=False)
+        self.cell = cell = rnn.MultiRNNCell([cell] * args.num_layers, state_is_tuple=True)
 
-        self.input_data = tf.placeholder(tf.int32, [args.batch_size, None])
-        # the length of input sequence is variable.
-        self.targets = tf.placeholder(tf.int32, [args.batch_size, None])
+        self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
+        self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
 
-        with tf.variable_scope('rnnlm', reuse=False):
+        with tf.variable_scope('rnnlm'):
             softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.nn.embedding_lookup(embedding, self.input_data)
+                inputs = tf.split(tf.nn.embedding_lookup(embedding, self.input_data), args.seq_length, 1)
+                inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
-        outputs, last_state = tf.nn.dynamic_rnn(cell, inputs, initial_state=self.initial_state, scope='rnnlm')
-        output = tf.reshape(outputs, [-1, args.rnn_size])
+        def loop(prev, _):
+            prev = tf.matmul(prev, softmax_w) + softmax_b
+            prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
+            return tf.nn.embedding_lookup(embedding, prev_symbol)
+
+        outputs, last_state = legacy_seq2seq.rnn_decoder(inputs, self.initial_state, cell,
+                                                         loop_function=loop if infer else None, scope='rnnlm')
+        output = tf.reshape(tf.concat(outputs, 1), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
-        targets = tf.reshape(self.targets, [-1])
-        loss = seq2seq.sequence_loss_by_example([self.logits],
-                                                [targets],
-                                                [tf.ones_like(targets, dtype=tf.float32)],
-                                                args.vocab_size)
-        self.cost = tf.reduce_mean(loss)
+        loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
+                                                       [tf.reshape(self.targets, [-1])],
+                                                       [tf.ones([args.batch_size * args.seq_length])],
+                                                       args.vocab_size)
+        self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         self.final_state = last_state
         self.lr = tf.Variable(0.0, trainable=False)
         tvars = tf.trainable_variables()
@@ -72,7 +77,7 @@ class Model():
                 return u"{} is not in charset!".format(char)
 
         if not prime:
-            state = self.cell.zero_state(1, tf.float32).eval()
+            state = sess.run(self.cell.zero_state(1, tf.float32))
             prime = u'^'
             result = u''
             x = np.array([list(map(vocab.get, prime))])
@@ -91,7 +96,7 @@ class Model():
             for prime_char in prime:
                 result += prime_char
                 x = np.array([list(map(vocab.get, result))])
-                state = self.cell.zero_state(1, tf.float32).eval()
+                state = sess.run(self.cell.zero_state(1, tf.float32))
                 [probs, state] = sess.run([self.probs, self.final_state],
                                           {self.input_data: x, self.initial_state: state})
                 char = pick_char(probs[-1])
