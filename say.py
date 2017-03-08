@@ -13,7 +13,14 @@ class Poem(object):
             key = title.get("keyword")
             if key is not None:
                 key = key.encode("utf-8")
-            return sample.say(key)
+            pool = self.con()
+            poem = pool.get('poem')
+            if poem is not None:
+                return poem
+            else:
+                back = sample.say(key)
+                pool.set('poem', back, ex=600)
+                return back
         except Exception, Argument:
             return Argument
 
