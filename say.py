@@ -13,8 +13,7 @@ class Poem(object):
             key = title.get("keyword")
             if key is not None:
                 key = key.encode("utf-8")
-            print(sample.say(key))
-            return "hello world!-get"
+            return sample.say(key)
         except Exception, Argument:
             return Argument
 

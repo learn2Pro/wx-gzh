@@ -44,7 +44,6 @@ def sample(keyword):
         ckpt = tf.train.get_checkpoint_state(r"./rnn")
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            print(model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip())
             return model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip()
             # args.prime
 
