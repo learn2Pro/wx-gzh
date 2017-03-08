@@ -27,9 +27,9 @@ def say(keyword):
     # if keyword is not None:
     #     args.prime = keyword
     if keyword is not None:
-        sample(keyword.decode("utf-8"))
+        return sample(keyword.decode("utf-8"))
     else:
-        sample(u"")
+        return sample(u"")
 
 
 def sample(keyword):
@@ -44,7 +44,8 @@ def sample(keyword):
         ckpt = tf.train.get_checkpoint_state(r"./rnn")
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            return model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip()
+            rs = model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip()
+            return rs
             # args.prime
 
 
