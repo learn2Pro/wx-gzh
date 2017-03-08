@@ -29,7 +29,7 @@ def say(keyword):
     if keyword is not None:
         sample(keyword.decode("utf-8"))
     else:
-        sample("")
+        sample(u"")
 
 
 def sample(keyword):

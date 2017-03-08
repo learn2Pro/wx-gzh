@@ -11,7 +11,9 @@ class Poem(object):
         try:
             title = web.input()
             key = title.get("keyword")
-            print(sample.say(key.encode("utf-8")))
+            if key is not None:
+                key = key.encode("utf-8")
+            print(sample.say(key))
             return "hello world!-get"
         except Exception, Argument:
             return Argument
