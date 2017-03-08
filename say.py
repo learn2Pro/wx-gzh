@@ -10,8 +10,8 @@ class Poem(object):
     def GET(self):
         try:
             title = web.input()
-            key = title.get("keyword");
-            sample.say(key)
+            key = title.get("keyword")
+            print(sample.say(key.encode("utf-8")))
             return "hello world!-get"
         except Exception, Argument:
             return Argument

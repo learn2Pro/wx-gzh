@@ -1,4 +1,5 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
+# filename: sample.py
 
 from __future__ import print_function
 import numpy as np
@@ -26,15 +27,15 @@ def say(keyword):
     # if keyword is not None:
     #     args.prime = keyword
     if keyword is not None:
-        sample(keyword)
+        sample(keyword.decode("utf-8"))
     else:
         sample("")
 
 
 def sample(keyword):
-    with open(os.path.join(r"./rnn/config.pkl"), 'rb') as f:
+    with open(os.path.join(r"./rnn/config.pkl").encode('utf-8').strip(), 'rb') as f:
         saved_args = cPickle.load(f)
-    with open(os.path.join(r"./rnn/chars_vocab.pkl"), 'rb') as f:
+    with open(os.path.join(r"./rnn/chars_vocab.pkl").encode('utf-8').strip(), 'rb') as f:
         chars, vocab = cPickle.load(f)
     model = Model(saved_args, True)
     with tf.Session() as sess:
@@ -43,10 +44,11 @@ def sample(keyword):
         ckpt = tf.train.get_checkpoint_state(r"./rnn")
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            print(model.sample(sess, chars, vocab, keyword, 1))
+            print(model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip())
+            return model.sample(sess, chars, vocab, keyword, 1).encode('utf-8').strip()
             # args.prime
 
 
 # decode('utf-8',errors='ignore')
 if __name__ == '__main__':
-    say("")
+    say(u"")

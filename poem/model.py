@@ -1,4 +1,5 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
+# filename: model.py
 
 import tensorflow as tf
 from tensorflow.contrib.rnn import core_rnn_cell as rnn_cell
